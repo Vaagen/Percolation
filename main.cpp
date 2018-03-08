@@ -21,10 +21,6 @@ double printMessageTime(std::string message, double start_time, double last_time
   return printTime(start_time,last_time);
 }
 
-// void burn(bool& isVacant, double& isSick, bool){
-//
-// }
-
 void plantTrees(int N, bool isOccupied[], double sowProbability){
 
   std::random_device rd;
@@ -42,7 +38,7 @@ void plantTrees(int N, bool isOccupied[], double sowProbability){
   std::cout << cumsum << std::endl;
 }
 
-void plotTrees(int N, bool isOccupied[], double isSick[], bool isDead[]){
+void plotTrees(int N, bool isOccupied[], const char marker[]){
   int numTrees=0;
   for( int i=0; i<N*N; i++){if(isOccupied[i]){numTrees++;}}
   std::vector<double> object_x(numTrees), object_y(numTrees);
@@ -58,7 +54,7 @@ void plotTrees(int N, bool isOccupied[], double isSick[], bool isDead[]){
       j+=1;
     }
   }
-  plt::plot(object_x,object_y,"g^");
+  plt::plot(object_x,object_y,marker);
   double axis_lim_buffer = N/10;
   plt::ylim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
   plt::xlim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
@@ -66,7 +62,7 @@ void plotTrees(int N, bool isOccupied[], double isSick[], bool isDead[]){
   plt::pause(0.001);
 }
 
-void plotFire(int N, double isSick[], bool isDead[]){
+void plotFire(int N, double isSick[]){
   int numBurningTrees=0;
   for( int i=0; i<N*N; i++){if(isSick[i]){numBurningTrees++;}}
   std::vector<double> object_x(numBurningTrees), object_y(numBurningTrees);
@@ -90,9 +86,13 @@ void plotFire(int N, double isSick[], bool isDead[]){
   plt::pause(0.001);
 }
 
-void ignite(int N, double isSick[]){
+void ignite(int N, bool isOccupied[], double isSick[]){
   for( int i=0; i<N; i++){
-    isSick[i]=1;
+    if(isOccupied[i]){
+      isSick[i]=1;
+    }else{
+      isSick[i]=0;
+    }
   }
   for( int i=N; i<N*N; i++){
     isSick[i]=0;
@@ -128,19 +128,19 @@ int main(int argc, char *argv[]){
   bool wasSick[N*N];
 
   plantTrees(N, isOccupied, 0.8);
-  plotTrees(N, isOccupied, isSick, isDead);
+  plotTrees(N, isOccupied, "g^");
 
 
 
   std::cout << "Press enter to continue." << std::endl;
   getchar();
 
-  ignite(N, isSick);
-  plt::clf(); // Clear plot
-  //plotTrees(N, isOccupied, isSick, isDead);
-  plotFire(N, isSick, isDead);
+  ignite(N, isOccupied, isSick);
+  plotFire(N, isSick);
   std::cout << "Press enter to continue." << std::endl;
   getchar();
+
+  //plt::clf(); // Clear plot
 
   last_time = printMessageTime("Reached end of main.", start_time, last_time);
   return 0;
