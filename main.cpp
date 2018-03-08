@@ -86,6 +86,59 @@ void plotFire(int N, double isSick[]){
   plt::pause(0.001);
 }
 
+void plotForest(int N, bool isOccupied[], double isSick[], bool isDead[]){
+  int numTrees=0;
+  for( int i=0; i<N*N; i++){if(isOccupied[i] && !isDead[i]){numTrees++;}}
+  int numDeadTrees=0;
+  for( int i=0; i<N*N; i++){if(isDead[i]){numDeadTrees++;}}
+  std::vector<double> greenTree_x(numTrees), greenTree_y(numTrees);
+  std::vector<double> deadTree_x(numDeadTrees), deadTree_y(numDeadTrees);
+  int j=0;
+  int greenTreesPlanted=0;
+  int deadTreesPlanted=0;
+  for( int i=0; i<N*N; i++){
+    if(isOccupied[i]){
+      if(!isDead[i]){
+        greenTree_x.at(greenTreesPlanted) = i%N;
+        greenTree_y.at(greenTreesPlanted) = j;
+        greenTreesPlanted++;
+      }else{
+        deadTree_x.at(deadTreesPlanted) = i%N;
+        deadTree_y.at(deadTreesPlanted) = j;
+        deadTreesPlanted++;
+      }
+    }
+    if(i%N==(N-1)){
+      j+=1;
+    }
+  }
+  plt::plot(greenTree_x,greenTree_y, "g^");
+  plt::plot(deadTree_x,deadTree_y,"k^");
+
+  int numBurningTrees=0;
+  for( int i=0; i<N*N; i++){if(isSick[i]){numBurningTrees++;}}
+  std::vector<double> object_x(numBurningTrees), object_y(numBurningTrees);
+  j=0;
+  int treesBurning=0;
+  for( int i=0; i<N*N; i++){
+    if(isSick[i]){
+      object_x.at(treesBurning) = i%N;
+      object_y.at(treesBurning) = j;
+      treesBurning++;
+    }
+    if(i%N==(N-1)){
+      j+=1;
+    }
+  }
+  plt::plot(object_x,object_y,"rv");
+
+  double axis_lim_buffer = N/10;
+  plt::ylim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  plt::xlim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  plt::draw();
+  plt::pause(0.001);
+}
+
 void ignite(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
   for( int i=0; i<N*N; i++){
     isDead[i]=0;
@@ -101,13 +154,13 @@ void ignite(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDe
 void propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
   for( int i=0; i<N*N; i++){
     if(isSick[i]){
-      if(i<(N*N-1) && isOccupied[i+1] && !isDead[i+1]){
-        isSick[i+1]=1;
+      if(i<1 && isOccupied[i-1] && !isDead[i-1]){
+        isSick[i-1]=1;
       }else if(i<N*(N-1) && isOccupied[i+N] && !isDead[i+N]){
         isSick[i+N]=1;
       }
     }else if(isOccupied[i] && !isDead[i]){ // If Sick it will be catched by previous if.
-      if(i>N && (isSick[i-1] || isSick[i-N])){
+      if(i<N*N && (isSick[i+1] || isSick[i-N])){
         isSick[i]=1;
       }
     }
@@ -121,6 +174,23 @@ void propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bo
       wasSick[i]=1;
     }
   }
+}
+
+void timeStep(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
+  propagateFire( N, isOccupied, isSick, wasSick, isDead);
+  plt::clf();
+  plotTrees(N, isOccupied, "g^");
+  plotTrees(N, isDead, "k^");
+  plotFire(N, isSick);
+  plt::pause(0.1);
+}
+
+int numSick(int N, double isSick[]){
+  int totalSick=0;
+  for( int i=0;i<N*N;i++){
+    totalSick+= isSick[i]!=0;
+  }
+  return totalSick;
 }
 
 int main(int argc, char *argv[]){
@@ -145,7 +215,7 @@ int main(int argc, char *argv[]){
     outputFile = argv[2];
   }
 
-  int N = 10;
+  int N = 100;
   bool isOccupied[N*N];
   double isSick[N*N];
   bool isDead[N*N];
@@ -153,9 +223,6 @@ int main(int argc, char *argv[]){
 
   plantTrees(N, isOccupied, 0.7);
   plotTrees(N, isOccupied, "g^");
-
-
-
   std::cout << "Press enter to continue." << std::endl;
   getchar();
 
@@ -164,15 +231,13 @@ int main(int argc, char *argv[]){
   std::cout << "Press enter to continue." << std::endl;
   getchar();
 
-  propagateFire( N, isOccupied, isSick, wasSick, isDead);
-  plt::clf();
-  plotTrees(N, isOccupied, "g^");
-  plotTrees(N, isDead, "k^");
-  plotFire(N, isSick);
-  std::cout << "Press enter to continue." << std::endl;
-  getchar();
-
-  //plt::clf(); // Clear plot
+  int totalSick = numSick(N,isSick);
+  while(totalSick){
+    propagateFire( N, isOccupied, isSick, wasSick, isDead);
+    plt::clf();
+    plotForest(N, isOccupied, isSick, isDead);
+    totalSick = numSick(N,isSick);
+  }
 
   last_time = printMessageTime("Reached end of main.", start_time, last_time);
   return 0;
