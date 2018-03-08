@@ -2,8 +2,10 @@
 #include <fstream>
 #include <sstream>
 #include <ctime>
+#include "../matplotlib-cpp/matplotlibcpp.h"
+#include <random>
 
-
+namespace plt = matplotlibcpp;
 
 double printTime(double start_time, double last_time){
   double stop_time =clock();
@@ -14,9 +16,87 @@ double printTime(double start_time, double last_time){
   return stop_time;
 }
 
-double printMessage(std::string message, double start_time, double last_time){
+double printMessageTime(std::string message, double start_time, double last_time){
   std::cout << message << std::endl;
   return printTime(start_time,last_time);
+}
+
+// void burn(bool& isVacant, double& isSick, bool){
+//
+// }
+
+void plantTrees(int N, bool isOccupied[], double sowProbability){
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+  int cumsum = 0;
+  for( int i=0; i<N*N; i++){
+    if (dis(gen)<=sowProbability){
+      isOccupied[i]=1;
+      cumsum++;
+    }else{
+      isOccupied[i]=0;
+    }
+  }
+  std::cout << cumsum << std::endl;
+}
+
+void plotTrees(int N, bool isOccupied[], double isSick[], bool isDead[]){
+  int numTrees=0;
+  for( int i=0; i<N*N; i++){if(isOccupied[i]){numTrees++;}}
+  std::vector<double> object_x(numTrees), object_y(numTrees);
+  int j=0;
+  int treesPlanted=0;
+  for( int i=0; i<N*N; i++){
+    if(isOccupied[i]){
+      object_x.at(treesPlanted) = i%10;
+      object_y.at(treesPlanted) = j;
+      treesPlanted++;
+    }
+    if(i%10==9){
+      j+=1;
+    }
+  }
+  plt::plot(object_x,object_y,"g^");
+  double axis_lim_buffer = N/10;
+  plt::ylim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  plt::xlim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  plt::draw();
+  plt::pause(0.001);
+}
+
+void plotFire(int N, double isSick[], bool isDead[]){
+  int numBurningTrees=0;
+  for( int i=0; i<N*N; i++){if(isSick[i]){numBurningTrees++;}}
+  std::vector<double> object_x(numBurningTrees), object_y(numBurningTrees);
+  int j=0;
+  int treesBurning=0;
+  for( int i=0; i<N*N; i++){
+    if(isSick[i]){
+      object_x.at(treesBurning) = i%10;
+      object_y.at(treesBurning) = j;
+      treesBurning++;
+    }
+    if(i%10==9){
+      j+=1;
+    }
+  }
+  plt::plot(object_x,object_y,"rv");
+  double axis_lim_buffer = N/10;
+  plt::ylim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  plt::xlim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  plt::draw();
+  plt::pause(0.001);
+}
+
+void ignite(int N, double isSick[]){
+  for( int i=0; i<N; i++){
+    isSick[i]=1;
+  }
+  for( int i=N; i<N*N; i++){
+    isSick[i]=0;
+  }
 }
 
 int main(int argc, char *argv[]){
@@ -41,8 +121,27 @@ int main(int argc, char *argv[]){
     outputFile = argv[2];
   }
 
+  int N = 10;
+  bool isOccupied[N*N];
+  double isSick[N*N];
+  bool isDead[N*N];
+  bool wasSick[N*N];
+
+  plantTrees(N, isOccupied, 0.8);
+  plotTrees(N, isOccupied, isSick, isDead);
 
 
-last_time = printMessage("Reached end of main.", start_time, last_time);
-return 0;
+
+  std::cout << "Press enter to continue." << std::endl;
+  getchar();
+
+  ignite(N, isSick);
+  plt::clf(); // Clear plot
+  //plotTrees(N, isOccupied, isSick, isDead);
+  plotFire(N, isSick, isDead);
+  std::cout << "Press enter to continue." << std::endl;
+  getchar();
+
+  last_time = printMessageTime("Reached end of main.", start_time, last_time);
+  return 0;
 }
