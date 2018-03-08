@@ -46,11 +46,11 @@ void plotTrees(int N, bool isOccupied[], const char marker[]){
   int treesPlanted=0;
   for( int i=0; i<N*N; i++){
     if(isOccupied[i]){
-      object_x.at(treesPlanted) = i%10;
+      object_x.at(treesPlanted) = i%N;
       object_y.at(treesPlanted) = j;
       treesPlanted++;
     }
-    if(i%10==9){
+    if(i%N==(N-1)){
       j+=1;
     }
   }
@@ -70,11 +70,11 @@ void plotFire(int N, double isSick[]){
   int treesBurning=0;
   for( int i=0; i<N*N; i++){
     if(isSick[i]){
-      object_x.at(treesBurning) = i%10;
+      object_x.at(treesBurning) = i%N;
       object_y.at(treesBurning) = j;
       treesBurning++;
     }
-    if(i%10==9){
+    if(i%N==(N-1)){
       j+=1;
     }
   }
@@ -86,16 +86,40 @@ void plotFire(int N, double isSick[]){
   plt::pause(0.001);
 }
 
-void ignite(int N, bool isOccupied[], double isSick[]){
-  for( int i=0; i<N; i++){
-    if(isOccupied[i]){
-      isSick[i]=1;
-    }else{
-      isSick[i]=0;
+void ignite(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
+  for( int i=0; i<N*N; i++){
+    isDead[i]=0;
+    isSick[i]=0;
+    wasSick[i]=0;
+    if(i<N && isOccupied[i]){
+      isSick[i] =1;
+      wasSick[i]=1;
     }
   }
-  for( int i=N; i<N*N; i++){
-    isSick[i]=0;
+}
+
+void propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
+  for( int i=0; i<N*N; i++){
+    if(isSick[i]){
+      if(i<(N*N-1) && isOccupied[i+1] && !isDead[i+1]){
+        isSick[i+1]=1;
+      }else if(i<N*(N-1) && isOccupied[i+N] && !isDead[i+N]){
+        isSick[i+N]=1;
+      }
+    }else if(isOccupied[i] && !isDead[i]){ // If Sick it will be catched by previous if.
+      if(i>N && (isSick[i-1] || isSick[i-N])){
+        isSick[i]=1;
+      }
+    }
+  }
+  for( int i=0; i<N*N; i++){
+    if(wasSick[i]){
+      isDead[i] =1;
+      isSick[i] =0;
+      wasSick[i]=0;
+    }else if(isSick[i]){ // Will set newly ignited trees to wasSick
+      wasSick[i]=1;
+    }
   }
 }
 
@@ -127,7 +151,7 @@ int main(int argc, char *argv[]){
   bool isDead[N*N];
   bool wasSick[N*N];
 
-  plantTrees(N, isOccupied, 0.8);
+  plantTrees(N, isOccupied, 0.7);
   plotTrees(N, isOccupied, "g^");
 
 
@@ -135,7 +159,15 @@ int main(int argc, char *argv[]){
   std::cout << "Press enter to continue." << std::endl;
   getchar();
 
-  ignite(N, isOccupied, isSick);
+  ignite(N, isOccupied, isSick, wasSick, isDead);
+  plotFire(N, isSick);
+  std::cout << "Press enter to continue." << std::endl;
+  getchar();
+
+  propagateFire( N, isOccupied, isSick, wasSick, isDead);
+  plt::clf();
+  plotTrees(N, isOccupied, "g^");
+  plotTrees(N, isDead, "k^");
   plotFire(N, isSick);
   std::cout << "Press enter to continue." << std::endl;
   getchar();
