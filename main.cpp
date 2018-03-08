@@ -160,7 +160,7 @@ void propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bo
         isSick[i+N]=1;
       }
     }else if(isOccupied[i] && !isDead[i]){ // If Sick it will be catched by previous if.
-      if(i<N*N && (isSick[i+1] || isSick[i-N])){
+      if( (isSick[i+1] || isSick[i-N])){
         isSick[i]=1;
       }
     }
