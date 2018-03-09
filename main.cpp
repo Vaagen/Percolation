@@ -5,6 +5,7 @@
 #include "../matplotlib-cpp/matplotlibcpp.h"
 #include <random>
 
+
 namespace plt = matplotlibcpp;
 
 double printTime(double start_time, double last_time){
@@ -198,6 +199,34 @@ int numDead(int N, bool isDead[]){
   }
   return totalDead;
 }
+
+void monteCarlo(double result[2], double p, int repetitions, int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[] ){
+  double densOfBurntTrees =0;
+  int totalSick =0;
+  double numTrees=0;
+  double numDeadTrees=0;
+  double avgTimeSteps=0;
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+
+  for( int rep=0; rep<repetitions; rep++){
+      numTrees = plantTrees( dis, gen, p, N, isOccupied, isSick, wasSick, isDead);
+      ignite(N, isOccupied, isSick, wasSick, isDead);
+      totalSick = numSick(N,isSick);
+      while(totalSick){
+        propagateFire( N, isOccupied, isSick, wasSick, isDead);
+        totalSick = numSick(N,isSick);
+        avgTimeSteps++;
+      }
+      numDeadTrees = numDead(N, isDead);
+      densOfBurntTrees+=numDeadTrees/numTrees;
+  }
+  result[0]=avgTimeSteps/repetitions;
+  result[1]=densOfBurntTrees/repetitions;
+}
+
 int main(int argc, char *argv[]){
   // Starting timer.
   double start_time=clock();
@@ -220,30 +249,45 @@ int main(int argc, char *argv[]){
     outputFile = argv[2];
   }
 
-  int N = 100;
+  int N = 40;
+  //double p = 0.01;
+  int repetitions = N*N*2;
+
   bool isOccupied[N*N];
   double isSick[N*N];
   bool isDead[N*N];
   bool wasSick[N*N];
 
-  plantTrees(N, isOccupied, 0.7);
-  plotTrees(N, isOccupied, "g^");
-  std::cout << "Press enter to continue." << std::endl;
-  getchar();
-
-  ignite(N, isOccupied, isSick, wasSick, isDead);
-  plotFire(N, isSick);
-  std::cout << "Press enter to continue." << std::endl;
-  getchar();
-
-  int totalSick = numSick(N,isSick);
-  while(totalSick){
-    propagateFire( N, isOccupied, isSick, wasSick, isDead);
-    plt::clf();
-    plotForest(N, isOccupied, isSick, isDead);
-    totalSick = numSick(N,isSick);
+  double resultsTotal[100][2];
+  int i=0;
+  for(double p=0.01; p<1; p+=0.01){
+    monteCarlo(resultsTotal[i], p, repetitions, N, isOccupied, isSick, wasSick, isDead);
+    i++;
   }
+
+  //double result[2];
+  //monteCarlo(result[], p, repetitions, N, isOccupied, isSick, wasSick, isDead);
+  std::cout << std::endl << resultsTotal[50][0] << "  " << resultsTotal[50][1] << std::endl;
 
   last_time = printMessageTime("Reached end of main.", start_time, last_time);
   return 0;
 }
+
+
+// plantTrees(N, isOccupied, 0.7);
+// plotTrees(N, isOccupied, "g^");
+// std::cout << "Press enter to continue." << std::endl;
+// getchar();
+//
+// ignite(N, isOccupied, isSick, wasSick, isDead);
+// plotFire(N, isSick);
+// std::cout << "Press enter to continue." << std::endl;
+// getchar();
+//
+// int totalSick = numSick(N,isSick);
+// while(totalSick){
+//   propagateFire( N, isOccupied, isSick, wasSick, isDead);
+//   plt::clf();
+//   plotForest(N, isOccupied, isSick, isDead);
+//   totalSick = numSick(N,isSick);
+// }
