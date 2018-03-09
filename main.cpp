@@ -4,9 +4,21 @@
 #include <ctime>
 #include "../matplotlib-cpp/matplotlibcpp.h"
 #include <random>
+#include <fstream>
+#include <sys/stat.h>
 
 
 namespace plt = matplotlibcpp;
+
+bool fileExists(const std::string& filename){
+  //https://stackoverflow.com/questions/4316442/stdofstream-check-if-file-exists-before-writing
+    struct stat buf;
+    if (stat(filename.c_str(), &buf) != -1)
+    {
+        return true;
+    }
+    return false;
+}
 
 double printTime(double start_time, double last_time){
   double stop_time =clock();
@@ -216,14 +228,16 @@ void monteCarlo(double result[2], double p, int repetitions, int N, bool isOccup
 
   for( int rep=0; rep<repetitions; rep++){
       numTrees = plantTrees( dis, gen, p, N, isOccupied, isSick, wasSick, isDead);
-      ignite(N, isOccupied, isSick, wasSick, isDead);
-      bool burning=true;
-      while(burning){
-        burning = propagateFire( N, isOccupied, isSick, wasSick, isDead);
-        avgTimeSteps++;
+      if(numTrees){
+        ignite(N, isOccupied, isSick, wasSick, isDead);
+        bool burning=true;
+        while(burning){
+          burning = propagateFire( N, isOccupied, isSick, wasSick, isDead);
+          avgTimeSteps++;
+        }
+        numDeadTrees = numDead(N, isDead);
+        densOfBurntTrees+=numDeadTrees/numTrees;
       }
-      numDeadTrees = numDead(N, isDead);
-      densOfBurntTrees+=numDeadTrees/numTrees;
   }
   result[0]=avgTimeSteps/repetitions;
   result[1]=densOfBurntTrees/repetitions;
@@ -234,44 +248,58 @@ int main(int argc, char *argv[]){
   double start_time=clock();
   double last_time=start_time;
 
-  // Checking for input.
-  // if (argc <2){
-  //   std::cout << "You have to supply input." << std::endl;
-  //   return 0;
-  // }
-  // Getting integer input
-  // int integerInput
-  // std::istringstream ss(argv[1]);
-  // if (!(ss >> integerInput)){
-  //   std::cerr << "Invalid number " << argv[1] << '\n';
-  // }
+  // Getting N
+  int N = 20;
+  if(argc>1){
+    std::istringstream ss(argv[1]);
+    if (!(ss >> N)){
+      std::cerr << "Invalid number " << argv[1] << '\n';
+    }
+  }
   // Getting output file name.
-  std::string outputFile = "output.txt";
+  std::string outputFileName = "output.txt";
   if (argc>2){
-    outputFile = argv[2];
+    outputFileName = argv[2];
+  }
+  // Getting number of repetitions
+  int repetitions = N*N*2;
+  if(argc>3){
+    std::istringstream ss(argv[3]);
+    if (!(ss >> repetitions)){
+      std::cerr << "Invalid number " << argv[3] << '\n';
+    }
   }
 
-  int N = 40;
-  //double p = 0.01;
-  int repetitions = N*N*2;
+  std::cout << "Starting calculation for N=" << N << ", using " << repetitions << " repetitions." << std::endl;
 
   bool isOccupied[N*N];
   double isSick[N*N];
   bool isDead[N*N];
   bool wasSick[N*N];
 
-  double resultsTotal[100][2];
-  int i=0;
-  for(double p=0.01; p<1; p+=0.01){
-    monteCarlo(resultsTotal[i], p, repetitions, N, isOccupied, isSick, wasSick, isDead);
-    i++;
+  bool emptyFile = !fileExists(outputFileName);
+  std::ofstream outputFile(outputFileName,std::ios_base::app);
+  if(!outputFile.is_open()){
+    std::cout << "Could not open file. N=" << N << std::endl;
+    return 0;
+  }
+  if(emptyFile){
+    outputFile << "N=" << N << ", repetitions=" << repetitions << ", col 0 is probability of tree, col 1 is avg(timesteps), col 2 is avg(burntTrees/totalTrees)." << std::endl;
   }
 
-  //double result[2];
-  //monteCarlo(result[], p, repetitions, N, isOccupied, isSick, wasSick, isDead);
-  std::cout << std::endl << resultsTotal[50][0] << "  " << resultsTotal[50][1] << std::endl;
+  double result[100][2];
+  int i=0;
+  for(double p=0.01; p<1; p+=0.01){
+    monteCarlo(result[i], p, repetitions, N, isOccupied, isSick, wasSick, isDead);
+    outputFile << p << '\t' << result[i][0] << '\t' << result[i][1] << std::endl;
+    i++;
+  }
+  outputFile.close();
 
-  last_time = printMessageTime("Reached end of main.", start_time, last_time);
+
+
+  std::cout << "Reached end of main. N=" << N << std::endl;
+  printTime(start_time,last_time);
   return 0;
 }
 
