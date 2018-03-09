@@ -26,7 +26,7 @@ int plantTrees(std::uniform_real_distribution<>& dis, std::mt19937& gen, double 
 
   int numTrees = 0;
   for( int i=0; i<N*N; i++){
-    if (dis(gen)<=sowProbability){
+    if (dis(gen)<sowProbability){
       isOccupied[i]=1;
       numTrees++;
     }else{
@@ -139,28 +139,30 @@ void plotForest(int N, bool isOccupied[], double isSick[], bool isDead[]){
 }
 
 void ignite(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
-  for( int i=0; i<N*N; i++){
-    isDead[i]=0;
-    isSick[i]=0;
-    wasSick[i]=0;
-    if(i<N && isOccupied[i]){
+  for( int i=0; i<N; i++){
+    if(isOccupied[i]){
       isSick[i] =1;
       wasSick[i]=1;
     }
   }
 }
 
-void propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
+bool propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
+  int NNm1 = N*(N-1);
+  bool burning=false; // Set to false if no more trees ignited.
   for( int i=0; i<N*N; i++){
     if(isSick[i]){
-      if(i<1 && isOccupied[i-1] && !isDead[i-1]){
+      if( isOccupied[i-1] && !isDead[i-1]){
         isSick[i-1]=1;
-      }else if(i<N*(N-1) && isOccupied[i+N] && !isDead[i+N]){
+        burning=true;
+      }else if(i<NNm1 && isOccupied[i+N] && !isDead[i+N]){
         isSick[i+N]=1;
+        burning=true;
       }
     }else if(isOccupied[i] && !isDead[i]){ // If Sick it will be catched by previous if.
       if( (isSick[i+1] || isSick[i-N])){
         isSick[i]=1;
+        burning=true;
       }
     }
   }
@@ -173,6 +175,7 @@ void propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bo
       wasSick[i]=1;
     }
   }
+  return burning;
 }
 
 void timeStep(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
@@ -214,10 +217,9 @@ void monteCarlo(double result[2], double p, int repetitions, int N, bool isOccup
   for( int rep=0; rep<repetitions; rep++){
       numTrees = plantTrees( dis, gen, p, N, isOccupied, isSick, wasSick, isDead);
       ignite(N, isOccupied, isSick, wasSick, isDead);
-      totalSick = numSick(N,isSick);
-      while(totalSick){
-        propagateFire( N, isOccupied, isSick, wasSick, isDead);
-        totalSick = numSick(N,isSick);
+      bool burning=true;
+      while(burning){
+        burning = propagateFire( N, isOccupied, isSick, wasSick, isDead);
         avgTimeSteps++;
       }
       numDeadTrees = numDead(N, isDead);
