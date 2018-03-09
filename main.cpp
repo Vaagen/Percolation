@@ -21,21 +21,19 @@ double printMessageTime(std::string message, double start_time, double last_time
   return printTime(start_time,last_time);
 }
 
-void plantTrees(int N, bool isOccupied[], double sowProbability){
+int plantTrees(std::uniform_real_distribution<>& dis, std::mt19937& gen, double sowProbability, int N, bool isOccupied[], double isSick[],bool wasSick[],bool isDead[]){
 
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(0.0, 1.0);
-  int cumsum = 0;
+  int numTrees = 0;
   for( int i=0; i<N*N; i++){
     if (dis(gen)<=sowProbability){
       isOccupied[i]=1;
-      cumsum++;
+      numTrees++;
     }else{
       isOccupied[i]=0;
     }
+    isSick[i]=wasSick[i]=isDead[i]=0; // Reset arrays when planting new forest.
   }
-  std::cout << cumsum << std::endl;
+  return numTrees;
 }
 
 void plotTrees(int N, bool isOccupied[], const char marker[]){
@@ -193,6 +191,13 @@ int numSick(int N, double isSick[]){
   return totalSick;
 }
 
+int numDead(int N, bool isDead[]){
+  int totalDead=0;
+  for( int i=0;i<N*N;i++){
+    totalDead+= isDead[i];
+  }
+  return totalDead;
+}
 int main(int argc, char *argv[]){
   // Starting timer.
   double start_time=clock();
