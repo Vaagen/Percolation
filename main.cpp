@@ -162,19 +162,16 @@ void ignite(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDe
 bool propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
   int NNm1 = N*(N-1);
   bool burning=false; // Set to false if no more trees ignited.
-  for( int i=0; i<N*N; i++){
+  for( int i=N; i<N*N; i++){
     if(isSick[i]){
       if( isOccupied[i-1] && !isDead[i-1]){
         isSick[i-1]=1;
-        burning=true;
       }else if(i<NNm1 && isOccupied[i+N] && !isDead[i+N]){
         isSick[i+N]=1;
-        burning=true;
       }
     }else if(isOccupied[i] && !isDead[i]){ // If Sick it will be catched by previous if.
       if( (isSick[i+1] || isSick[i-N])){
         isSick[i]=1;
-        burning=true;
       }
     }
   }
@@ -185,6 +182,7 @@ bool propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bo
       wasSick[i]=0;
     }else if(isSick[i]){ // Will set newly ignited trees to wasSick
       wasSick[i]=1;
+      burning=true;
     }
   }
   return burning;
@@ -272,10 +270,12 @@ int main(int argc, char *argv[]){
 
   std::cout << "Starting calculation for N=" << N << ", using " << repetitions << " repetitions." << std::endl;
 
-  bool isOccupied[N*N];
-  double isSick[N*N];
-  bool isDead[N*N];
-  bool wasSick[N*N];
+  bool isOccupied[N*N+1];
+  double isSick[N*N+1];
+  bool isDead[N*N+1];
+  bool wasSick[N*N+1];
+  // Extra element to make loop more simple.
+  isOccupied[N*N]=isSick[N*N]=wasSick[N*N]=isDead[N*N]=0;
 
   bool emptyFile = !fileExists(outputFileName);
   std::ofstream outputFile(outputFileName,std::ios_base::app);
@@ -287,6 +287,7 @@ int main(int argc, char *argv[]){
     outputFile << "N=" << N << ", repetitions=" << repetitions << ", col 0 is probability of tree, col 1 is avg(timesteps), col 2 is avg(burntTrees/totalTrees)." << std::endl;
   }
 
+  // Run montecarlo for each probability.
   double result[100][2];
   int i=0;
   for(double p=0.01; p<1; p+=0.01){
@@ -296,28 +297,33 @@ int main(int argc, char *argv[]){
   }
   outputFile.close();
 
+  // To see fire propagation
+  // std::random_device rd;
+  // std::mt19937 gen(rd());
+  // std::uniform_real_distribution<> dis(0.0, 1.0);
+  // int numTrees = plantTrees( dis, gen, 0.6, N, isOccupied, isSick, wasSick, isDead);
+  // std::cout << numTrees << std::endl;
+  // std::cout << N*N << std::endl;
+  // //plotForest(N, isOccupied, isSick, isDead);
+  // //std::cout << "Press enter to continue." << std::endl;
+  // //getchar();
+  // ignite(N, isOccupied, isSick, wasSick, isDead);
+  // //plotForest(N, isOccupied, isSick, isDead);
+  // //std::cout << "Press enter to continue." << std::endl;
+  // //getchar();
+  // bool burning=true;
+  // while(burning){
+  //   burning = propagateFire( N, isOccupied, isSick, wasSick, isDead);
+  //   plt::clf();
+  //   plotForest(N, isOccupied, isSick, isDead);
+  //   // To stop in between every time step.
+  //   std::cout << "Press enter to continue." << std::endl;
+  //   getchar();
+  // }
+
 
 
   std::cout << "Reached end of main. N=" << N << std::endl;
   printTime(start_time,last_time);
   return 0;
 }
-
-
-// plantTrees(N, isOccupied, 0.7);
-// plotTrees(N, isOccupied, "g^");
-// std::cout << "Press enter to continue." << std::endl;
-// getchar();
-//
-// ignite(N, isOccupied, isSick, wasSick, isDead);
-// plotFire(N, isSick);
-// std::cout << "Press enter to continue." << std::endl;
-// getchar();
-//
-// int totalSick = numSick(N,isSick);
-// while(totalSick){
-//   propagateFire( N, isOccupied, isSick, wasSick, isDead);
-//   plt::clf();
-//   plotForest(N, isOccupied, isSick, isDead);
-//   totalSick = numSick(N,isSick);
-// }
