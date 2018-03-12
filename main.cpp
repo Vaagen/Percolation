@@ -162,15 +162,16 @@ void ignite(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDe
 bool propagateFire(int N, bool isOccupied[], double isSick[], bool wasSick[], bool isDead[]){
   int NNm1 = N*(N-1);
   bool burning=false; // Set to false if no more trees ignited.
-  for( int i=N; i<N*N; i++){
+  for( int i=0; i<N*N; i++){
     if(isSick[i]){
       if( isOccupied[i-1] && !isDead[i-1]){
         isSick[i-1]=1;
-      }else if(i<NNm1 && isOccupied[i+N] && !isDead[i+N]){
+      }
+      if(i<NNm1 && isOccupied[i+N] && !isDead[i+N]){
         isSick[i+N]=1;
       }
     }else if(isOccupied[i] && !isDead[i]){ // If Sick it will be catched by previous if.
-      if( (isSick[i+1] || isSick[i-N])){
+      if( (isSick[i-1] || (isSick[i+N]&&i<NNm1))){
         isSick[i]=1;
       }
     }
