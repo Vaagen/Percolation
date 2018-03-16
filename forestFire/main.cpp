@@ -2,7 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <ctime>
-#include "../matplotlib-cpp/matplotlibcpp.h"
+#include "../../matplotlib-cpp/matplotlibcpp.h"
 #include <random>
 #include <fstream>
 #include <sys/stat.h>
@@ -298,7 +298,7 @@ int main(int argc, char *argv[]){
   }
   outputFile.close();
 
-  // To see fire propagation
+  // // To see fire propagation
   // std::random_device rd;
   // std::mt19937 gen(rd());
   // std::uniform_real_distribution<> dis(0.0, 1.0);
@@ -318,8 +318,8 @@ int main(int argc, char *argv[]){
   //   plt::clf();
   //   plotForest(N, isOccupied, isSick, isDead);
   //   // To stop in between every time step.
-  //   std::cout << "Press enter to continue." << std::endl;
-  //   getchar();
+  //   // std::cout << "Press enter to continue." << std::endl;
+  //   // getchar();
   // }
 
 
