@@ -7,6 +7,6 @@
 
 void initializeEpidemic(int N, double initialFraction, int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[]);
 void transmitPathogen(int N,int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[]);
-void infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[]);
+int infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[]);
 
 #endif // #ifndef __epidemic_included__

@@ -32,6 +32,37 @@ double printMessageTime(std::string message, double start_time, double last_time
   return printTime(start_time,last_time);
 }
 
+namespace plt = matplotlibcpp;
+
+void plotPeople(int N, int isSick[]){
+  int numSick=0;
+  for( int i=0; i<N*N; i++){if(isSick[i]){numSick++;}}
+  std::vector<double> everyone_x(N*N), everyone_y(N*N);
+  std::vector<double> sick_x(numSick), sick_y(numSick);
+  int j=0;
+  int sickAdded=0;
+  for( int i=0; i<N*N; i++){
+    if(isSick[i]){
+      sick_x.at(sickAdded)=i%N;
+      sick_y.at(sickAdded)=j;
+      sickAdded++;
+    }
+    everyone_x.at(i)=i%N;
+    everyone_y.at(i)=j;
+    if(i%N==(N-1)){
+      j+=1;
+    }
+  }
+  plt::plot(everyone_x,everyone_y, "b.");
+  plt::plot(sick_x,sick_y,"ro");
+
+  double axis_lim_buffer = N/10;
+  plt::ylim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  plt::xlim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  plt::draw();
+  plt::pause(0.001);
+}
+
 
 int main(int argc, char *argv[]){
   // Starting timer.
@@ -71,7 +102,7 @@ int main(int argc, char *argv[]){
   double infectionProb = 0.5;
   double relativeReinfectionProb = 0;
   double reinfectionProb = infectionProb*relativeReinfectionProb;
-  double mutationProb = 0.1;
+  double mutationProb = 0;
   int maxMutations = 1e3;
   bool* infectionJournal = new bool[N*N*maxMutations];
   // The journal is indexed with true/false at location i if person has had mutation i+1
@@ -80,9 +111,16 @@ int main(int argc, char *argv[]){
   initializeEpidemic(N, initialFraction, maxMutations, isSick, givenGerm, infectionJournal);
 
   // Propagate virus
-  transmitPathogen(N, maxMutations, isSick, givenGerm, infectionJournal);
-  infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, infectionJournal);
-
+  int numSick=1; //dummy variable
+  while(numSick){
+    transmitPathogen(N, maxMutations, isSick, givenGerm, infectionJournal);
+    numSick = infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, infectionJournal);
+    std::cout << numSick << std::endl;
+    plotPeople(N, isSick);
+      // To stop in between every time step.
+      std::cout << "Press enter to continue." << std::endl;
+      getchar();
+  }
 
   // Clean up
   delete[] isSick;

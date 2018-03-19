@@ -53,12 +53,13 @@ void transmitPathogen(int N,int maxMutations,int isSick[],int givenGerm[],bool i
   }
 }
 
-void infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[]){
+int infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[]){
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> real_dis(0.0, 1.0);
   std::uniform_int_distribution<> int_dis(1, maxMutations);
-
+  int numSick=0;
+  std::cout << reinfectionProb << '\n';
   for(int i=0; i<N*N; ++i){
     if(givenGerm[i]){ // If aquired pathogen
       // Mutate strain with probability mutationProb
@@ -70,6 +71,7 @@ void infectPeople(int N, double infectionProb, double reinfectionProb, double mu
         if (real_dis(gen)<reinfectionProb){ // gets sick
           isSick[i] = givenGerm[i];
           givenGerm[i] = 0;
+          numSick++;
         }else{ // does not get sick
           isSick[i] = 0;
           givenGerm[i] = 0;
@@ -78,7 +80,8 @@ void infectPeople(int N, double infectionProb, double reinfectionProb, double mu
         if (real_dis(gen)<infectionProb){ // gets sick
           isSick[i] = givenGerm[i];
           givenGerm[i] = 0;
-          infectionJournal[i*maxMutations + givenGerm[i]-1] = 1; // aquires immunity
+          infectionJournal[i*maxMutations + givenGerm[i]] = 1; // aquires immunity
+          numSick++;
         }else{ // does not get sick
           isSick[i] = 0;
           givenGerm[i] = 0;
@@ -88,4 +91,5 @@ void infectPeople(int N, double infectionProb, double reinfectionProb, double mu
       isSick[i]=0;
     }
   }
+  return numSick;
 }
