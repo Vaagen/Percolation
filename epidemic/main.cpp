@@ -69,6 +69,10 @@ int main(int argc, char *argv[]){
   bool* wasSick = new bool[N*N];
 
   double initialFraction = 0.01;
+  double infectionProb = 0.5;
+  double relativeReinfectionProb = 0;
+  double reinfectionProb = infectionProb*relativeReinfectionProb;
+  double mutationProb = 0.1;
   int maxMutations = 1e3;
   bool* infectionJournal = new bool[N*N*maxMutations];
   // The journal is indexed with true/false at location i if person has had mutation i+1
@@ -77,7 +81,8 @@ int main(int argc, char *argv[]){
   initializeEpidemic(N, initialFraction, maxMutations, isSick, givenGerm, wasSick, infectionJournal);
 
   // Propagate virus
-  
+  transmitPathogen(N, maxMutations, isSick, givenGerm, wasSick, infectionJournal);
+  infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, wasSick, infectionJournal);
 
 
   // Clean up
