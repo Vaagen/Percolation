@@ -66,7 +66,6 @@ int main(int argc, char *argv[]){
 
   int* isSick = new int[N*N];
   int* givenGerm = new int[N*N];
-  bool* wasSick = new bool[N*N];
 
   double initialFraction = 0.01;
   double infectionProb = 0.5;
@@ -78,17 +77,16 @@ int main(int argc, char *argv[]){
   // The journal is indexed with true/false at location i if person has had mutation i+1
 
   // Initialize, set values to zero and infect 1% with mutation 1
-  initializeEpidemic(N, initialFraction, maxMutations, isSick, givenGerm, wasSick, infectionJournal);
+  initializeEpidemic(N, initialFraction, maxMutations, isSick, givenGerm, infectionJournal);
 
   // Propagate virus
-  transmitPathogen(N, maxMutations, isSick, givenGerm, wasSick, infectionJournal);
-  infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, wasSick, infectionJournal);
+  transmitPathogen(N, maxMutations, isSick, givenGerm, infectionJournal);
+  infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, infectionJournal);
 
 
   // Clean up
   delete[] isSick;
   delete[] givenGerm;
-  delete[] wasSick;
   delete[] infectionJournal;
 
   std::cout << "Reached end of main. N=" << N << std::endl;

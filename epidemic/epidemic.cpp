@@ -1,6 +1,6 @@
 #include "epidemic.h"
 
-void initializeEpidemic(int N, double initialFraction, int maxMutations,int isSick[],int givenGerm[],bool wasSick[],bool infectionJournal[]){
+void initializeEpidemic(int N, double initialFraction, int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[]){
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0.0, 1.0);
@@ -13,17 +13,17 @@ void initializeEpidemic(int N, double initialFraction, int maxMutations,int isSi
     }
 
     if (dis(gen)<initialFraction){
-      isSick[i] = wasSick[i] = 1; // is sick with mutation 1
+      isSick[i] = 1; // is sick with mutation 1
       infectionJournal[i*maxMutations] = 1; // has been sick with mutation 1 -1 = 0
       numSick++;
     }else{
-      isSick[i]= wasSick[i] = 0;
+      isSick[i] = 0;
     }
   }
   std::cout << numSick << std::endl;
 }
 
-void transmitPathogen(int N,int maxMutations,int isSick[],int givenGerm[],bool wasSick[],bool infectionJournal[]){
+void transmitPathogen(int N,int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[]){
   // give germ to neighbors
   //first element
   if(isSick[0]){ //give neighbors pathogen
@@ -53,7 +53,7 @@ void transmitPathogen(int N,int maxMutations,int isSick[],int givenGerm[],bool w
   }
 }
 
-void infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[], bool wasSick[],bool infectionJournal[]){
+void infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[]){
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> real_dis(0.0, 1.0);
@@ -69,22 +69,18 @@ void infectPeople(int N, double infectionProb, double reinfectionProb, double mu
       if(infectionJournal[i*maxMutations + givenGerm[i]-1]){// if had strain before
         if (real_dis(gen)<reinfectionProb){ // gets sick
           isSick[i] = givenGerm[i];
-          wasSick[i] = 1;
           givenGerm[i] = 0;
         }else{ // does not get sick
           isSick[i] = 0;
-          wasSick[i] = 0;
           givenGerm[i] = 0;
         }
       }else{ // not had strain before
         if (real_dis(gen)<infectionProb){ // gets sick
           isSick[i] = givenGerm[i];
-          wasSick[i] = 1;
           givenGerm[i] = 0;
           infectionJournal[i*maxMutations + givenGerm[i]-1] = 1; // aquires immunity
         }else{ // does not get sick
           isSick[i] = 0;
-          wasSick[i] = 0;
           givenGerm[i] = 0;
         }
       }
