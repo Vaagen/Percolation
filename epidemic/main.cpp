@@ -65,6 +65,8 @@ void plotPeople(int N, int isSick[]){
 
 
 int main(int argc, char *argv[]){
+  // Seed random
+  srand (time(NULL));
   // Starting timer.
   double start_time=clock();
   double last_time=start_time;

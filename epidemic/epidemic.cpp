@@ -63,12 +63,12 @@ int infectPeople(int N, double infectionProb, double reinfectionProb, double mut
   for(int i=0; i<N*N; ++i){
     if(givenGerm[i]){ // If aquired pathogen
       // Mutate strain with probability mutationProb
-      if (real_dis(gen)<mutationProb){
+      if (((double) rand() / (RAND_MAX)) + 1<mutationProb){
         givenGerm[i] = int_dis(gen);
       }
       // Infect with correct probability
       if(infectionJournal[i*maxMutations + givenGerm[i]-1]){// if had strain before
-        if (real_dis(gen)<reinfectionProb){ // gets sick
+        if (((double) rand() / (RAND_MAX)) + 1<reinfectionProb){ // gets sick
           isSick[i] = givenGerm[i];
           givenGerm[i] = 0;
           numSick++;
