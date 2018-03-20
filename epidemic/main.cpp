@@ -63,10 +63,39 @@ void plotPeople(int N, int isSick[]){
   plt::pause(0.001);
 }
 
+void plotHist(){
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> real_dis(0.0, 1.0);
+  std::vector<double> X(101), Y1(101), Y2(101);
+  for(int i=0;i<=100;++i){
+    X.at(i)=i;
+  }
+  double randomNum=0;
+  int index=0;
+  for(int i=0;i<100000;++i){
+    randomNum = ((double) rand() / (RAND_MAX));
+    index = round(randomNum*100);
+    Y1.at(index)++;
+    randomNum = real_dis(gen);
+    index = round(randomNum*100);
+    Y2.at(index)++;
+  }
+  plt::plot(X,Y1,"r*");
+  plt::plot(X,Y2,"b*");
+  plt::draw();
+  plt::pause(0.001);
+  std::cout << "Press enter to continue." << std::endl;
+  getchar();
+}
+
 
 int main(int argc, char *argv[]){
   // Seed random
   srand (time(NULL));
+  // // Visual comparison of generators
+  // plotHist();
+  // return(0);
   // Starting timer.
   double start_time=clock();
   double last_time=start_time;
@@ -120,7 +149,7 @@ int main(int argc, char *argv[]){
   int t=0;
   double NN=N*N;
   while(numSick && t<maxTime){
-    //std::cout << numSick/NN << std::endl;
+    std::cout << numSick/NN << std::endl;
     ++t;
     transmitPathogen(N, maxMutations, isSick, givenGerm, infectionJournal);
     numSick = infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, infectionJournal);

@@ -1,10 +1,10 @@
 #include "epidemic.h"
 
 int initializeEpidemic(int N, double initialFraction, int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[]){
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(0.0, 1.0);
-
+  // std::random_device rd;
+  // std::mt19937 gen(rd());
+  // std::uniform_real_distribution<> dis(0.0, 1.0);
+  // // Use with dis(gen)
   int numSick = 0;
   for(int i=0; i<N*N; ++i){
     givenGerm[i]=0;
@@ -12,7 +12,7 @@ int initializeEpidemic(int N, double initialFraction, int maxMutations,int isSic
       infectionJournal[i*maxMutations + j]=0;
     }
 
-    if (dis(gen)<initialFraction){
+    if (((double) rand() / (RAND_MAX))<initialFraction){
       isSick[i] = 1; // is sick with mutation 1
       infectionJournal[i*maxMutations] = 1; // has been sick with mutation 1 -1 = 0
       numSick++;
@@ -54,20 +54,20 @@ void transmitPathogen(int N,int maxMutations,int isSick[],int givenGerm[],bool i
 }
 
 int infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[]){
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> real_dis(0.0, 1.0);
-  std::uniform_int_distribution<> int_dis(1, maxMutations);
+  // std::random_device rd;
+  // std::mt19937 gen(rd());
+  // std::uniform_real_distribution<> real_dis(0.0, 1.0);
+  // std::uniform_int_distribution<> int_dis(1, maxMutations);
   int numSick=0;
   for(int i=0; i<N*N; ++i){
     if(givenGerm[i]){ // If aquired pathogen
       // Mutate strain with probability mutationProb
-      if (((double) rand() / (RAND_MAX)) + 1<mutationProb){
-        givenGerm[i] = int_dis(gen);
+      if (((double) rand() / (RAND_MAX))<mutationProb){
+        givenGerm[i] = round(((double) rand() / (RAND_MAX))*maxMutations);
       }
       // Infect with correct probability
       if(infectionJournal[i*maxMutations + givenGerm[i]-1]){// if had strain before
-        if (((double) rand() / (RAND_MAX)) + 1<reinfectionProb){ // gets sick
+        if (((double) rand() / (RAND_MAX))<reinfectionProb){ // gets sick
           isSick[i] = givenGerm[i];
           givenGerm[i] = 0;
           numSick++;
@@ -76,7 +76,7 @@ int infectPeople(int N, double infectionProb, double reinfectionProb, double mut
           givenGerm[i] = 0;
         }
       }else{ // not had strain before
-        if (real_dis(gen)<infectionProb){ // gets sick
+        if (((double) rand() / (RAND_MAX))<infectionProb){ // gets sick
           isSick[i] = givenGerm[i];
           givenGerm[i] = 0;
           infectionJournal[i*maxMutations + givenGerm[i]] = 1; // aquires immunity
