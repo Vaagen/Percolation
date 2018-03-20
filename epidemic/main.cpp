@@ -32,8 +32,6 @@ double printMessageTime(std::string message, double start_time, double last_time
   return printTime(start_time,last_time);
 }
 
-namespace plt = matplotlibcpp;
-
 void plotPeople(int N, int isSick[]){
   int numSick=0;
   for( int i=0; i<N*N; i++){if(isSick[i]){numSick++;}}
@@ -53,14 +51,14 @@ void plotPeople(int N, int isSick[]){
       j+=1;
     }
   }
-  plt::plot(everyone_x,everyone_y, "b.");
-  plt::plot(sick_x,sick_y,"ro");
+  matplotlibcpp::plot(everyone_x,everyone_y, "b.");
+  matplotlibcpp::plot(sick_x,sick_y,"ro");
 
   double axis_lim_buffer = N/10;
-  plt::ylim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
-  plt::xlim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
-  plt::draw();
-  plt::pause(0.001);
+  matplotlibcpp::ylim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  matplotlibcpp::xlim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
+  matplotlibcpp::draw();
+  matplotlibcpp::pause(0.001);
 }
 
 void plotHist(){
@@ -81,10 +79,10 @@ void plotHist(){
     index = round(randomNum*100);
     Y2.at(index)++;
   }
-  plt::plot(X,Y1,"r*");
-  plt::plot(X,Y2,"b*");
-  plt::draw();
-  plt::pause(0.001);
+  matplotlibcpp::plot(X,Y1,"r*");
+  matplotlibcpp::plot(X,Y2,"b*");
+  matplotlibcpp::draw();
+  matplotlibcpp::pause(0.001);
   std::cout << "Press enter to continue." << std::endl;
   getchar();
 }
