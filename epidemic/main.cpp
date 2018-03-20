@@ -127,12 +127,12 @@ int main(int argc, char *argv[]){
 
   double initialFraction = 0.01;
   double infectionProb = 0.4;
-  double relativeReinfectionProb = 1;
+  double relativeReinfectionProb = 0;
   double mutationProb = 0;
 
 
-  int maxMutations = 1000;
-  int maxTime =100000;
+  int maxMutations = 10;
+  int maxTime =1000;
 
   int* isSick = new int[N*N];
   int* givenGerm = new int[N*N];
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]){
   int t=0;
   double NN=N*N;
   while(numSick && t<maxTime){
-    std::cout << numSick/NN << std::endl;
+    //std::cout << numSick/NN << std::endl;
     ++t;
     transmitPathogen(N, maxMutations, isSick, givenGerm, infectionJournal);
     numSick = infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, infectionJournal);
@@ -159,6 +159,12 @@ int main(int argc, char *argv[]){
     //  std::cout << "Press enter to continue." << std::endl;
     //  getchar();
   }
+
+
+  std::cout << "Total time steps = " << t << '\n';
+  double fractionSick=0;
+  fractionSick = totalBeenSick(N,maxMutations,infectionJournal)/(NN);
+  std::cout << "Fraction have been sick: " << fractionSick << '\n';
 
   // Clean up
   delete[] isSick;

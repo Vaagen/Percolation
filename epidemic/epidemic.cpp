@@ -63,32 +63,47 @@ int infectPeople(int N, double infectionProb, double reinfectionProb, double mut
     if(givenGerm[i]){ // If aquired pathogen
       // Mutate strain with probability mutationProb
       if (((double) rand() / (RAND_MAX))<mutationProb){
-        givenGerm[i] = round(((double) rand() / (RAND_MAX))*maxMutations);
+        givenGerm[i] = ceil(((double) rand() / (RAND_MAX))*maxMutations); //ceil to avoid mutating to zero (healthy)
       }
       // Infect with correct probability
       if(infectionJournal[i*maxMutations + givenGerm[i]-1]){// if had strain before
         if (((double) rand() / (RAND_MAX))<reinfectionProb){ // gets sick
           isSick[i] = givenGerm[i];
-          givenGerm[i] = 0;
           numSick++;
         }else{ // does not get sick
           isSick[i] = 0;
-          givenGerm[i] = 0;
         }
       }else{ // not had strain before
         if (((double) rand() / (RAND_MAX))<infectionProb){ // gets sick
           isSick[i] = givenGerm[i];
-          givenGerm[i] = 0;
-          infectionJournal[i*maxMutations + givenGerm[i]] = 1; // aquires immunity
+          infectionJournal[i*maxMutations + givenGerm[i]-1] = 1; // aquires immunity
           numSick++;
         }else{ // does not get sick
           isSick[i] = 0;
-          givenGerm[i] = 0;
         }
       }
     }else{ // not aquired pathogen, time to get healthy if sick (or stay healthy)
       isSick[i]=0;
     }
+    givenGerm[i]=0;
   }
   return numSick;
+}
+
+int totalBeenSick(int N, int maxMutations, bool infectionJournal[]){
+  bool thisGuyWasSick =0;
+  int mutationNum = 1; // note: shifted in journal
+  int totalSick=0;
+  for(int i=0;i<N*N; ++i){
+    while(!thisGuyWasSick && (mutationNum <= maxMutations)){
+      thisGuyWasSick= infectionJournal[i*maxMutations + mutationNum-1];
+      mutationNum++;
+    }
+    if(thisGuyWasSick){
+      totalSick++;
+    }
+    thisGuyWasSick=0;
+    mutationNum=1;
+  }
+  return totalSick;
 }
