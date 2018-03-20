@@ -96,32 +96,39 @@ int main(int argc, char *argv[]){
   //   // outputFile << "N=" << N << ", repetitions=" << repetitions << ", col 0 is probability of tree, col 1 is avg(timesteps), col 2 is avg(burntTrees/totalTrees)." << std::endl;
   // }
 
+  double initialFraction = 0.01;
+  double infectionProb = 0.4;
+  double relativeReinfectionProb = 1;
+  double mutationProb = 0;
+
+
+  int maxMutations = 1000;
+  int maxTime =100000;
 
   int* isSick = new int[N*N];
   int* givenGerm = new int[N*N];
-
-  double initialFraction = 0.01;
-  double infectionProb = 0.5;
-  double relativeReinfectionProb = 0;
   double reinfectionProb = infectionProb*relativeReinfectionProb;
-  double mutationProb = 0;
-  int maxMutations = 1e3;
   bool* infectionJournal = new bool[N*N*maxMutations];
   // The journal is indexed with true/false at location i if person has had mutation i+1
-
+  int numSick=0;
   // Initialize, set values to zero and infect 1% with mutation 1
-  initializeEpidemic(N, initialFraction, maxMutations, isSick, givenGerm, infectionJournal);
+  numSick = initializeEpidemic(N, initialFraction, maxMutations, isSick, givenGerm, infectionJournal);
+  std::cout << "Finished initialization of epidemic."<< std::endl;
+  last_time = printTime(start_time,last_time);
 
   // Propagate virus
-  int numSick=1; //dummy variable
-  while(numSick){
+  int t=0;
+  double NN=N*N;
+  while(numSick && t<maxTime){
+    //std::cout << numSick/NN << std::endl;
+    ++t;
     transmitPathogen(N, maxMutations, isSick, givenGerm, infectionJournal);
     numSick = infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, infectionJournal);
-    std::cout << numSick << std::endl;
-    plotPeople(N, isSick);
-      // To stop in between every time step.
-      std::cout << "Press enter to continue." << std::endl;
-      getchar();
+
+    // plotPeople(N, isSick);
+    //  // To stop in between every time step.
+    //  std::cout << "Press enter to continue." << std::endl;
+    //  getchar();
   }
 
   // Clean up

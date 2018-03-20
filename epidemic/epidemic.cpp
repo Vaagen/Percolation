@@ -1,6 +1,6 @@
 #include "epidemic.h"
 
-void initializeEpidemic(int N, double initialFraction, int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[]){
+int initializeEpidemic(int N, double initialFraction, int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[]){
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0.0, 1.0);
@@ -20,7 +20,7 @@ void initializeEpidemic(int N, double initialFraction, int maxMutations,int isSi
       isSick[i] = 0;
     }
   }
-  std::cout << numSick << std::endl;
+  return numSick;
 }
 
 void transmitPathogen(int N,int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[]){
@@ -59,7 +59,6 @@ int infectPeople(int N, double infectionProb, double reinfectionProb, double mut
   std::uniform_real_distribution<> real_dis(0.0, 1.0);
   std::uniform_int_distribution<> int_dis(1, maxMutations);
   int numSick=0;
-  std::cout << reinfectionProb << '\n';
   for(int i=0; i<N*N; ++i){
     if(givenGerm[i]){ // If aquired pathogen
       // Mutate strain with probability mutationProb
