@@ -27,67 +27,6 @@ double printTime(double start_time, double last_time){
   return stop_time;
 }
 
-double printMessageTime(std::string message, double start_time, double last_time){
-  std::cout << message << std::endl;
-  return printTime(start_time,last_time);
-}
-
-void plotPeople(int N, int isSick[]){
-  int numSick=0;
-  for( int i=0; i<N*N; i++){if(isSick[i]){numSick++;}}
-  std::vector<double> everyone_x(N*N), everyone_y(N*N);
-  std::vector<double> sick_x(numSick), sick_y(numSick);
-  int j=0;
-  int sickAdded=0;
-  for( int i=0; i<N*N; i++){
-    if(isSick[i]){
-      sick_x.at(sickAdded)=i%N;
-      sick_y.at(sickAdded)=j;
-      sickAdded++;
-    }
-    everyone_x.at(i)=i%N;
-    everyone_y.at(i)=j;
-    if(i%N==(N-1)){
-      j+=1;
-    }
-  }
-  matplotlibcpp::plot(everyone_x,everyone_y, "b.");
-  matplotlibcpp::plot(sick_x,sick_y,"ro");
-
-  double axis_lim_buffer = N/10;
-  matplotlibcpp::ylim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
-  matplotlibcpp::xlim(-axis_lim_buffer, (N-1)+axis_lim_buffer);
-  matplotlibcpp::draw();
-  matplotlibcpp::pause(0.001);
-}
-
-void plotHist(){
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> real_dis(0.0, 1.0);
-  std::vector<double> X(101), Y1(101), Y2(101);
-  for(int i=0;i<=100;++i){
-    X.at(i)=i;
-  }
-  double randomNum=0;
-  int index=0;
-  for(int i=0;i<100000;++i){
-    randomNum = ((double) rand() / (RAND_MAX));
-    index = round(randomNum*100);
-    Y1.at(index)++;
-    randomNum = real_dis(gen);
-    index = round(randomNum*100);
-    Y2.at(index)++;
-  }
-  matplotlibcpp::plot(X,Y1,"r*");
-  matplotlibcpp::plot(X,Y2,"b*");
-  matplotlibcpp::draw();
-  matplotlibcpp::pause(0.001);
-  std::cout << "Press enter to continue." << std::endl;
-  getchar();
-}
-
-
 int main(int argc, char *argv[]){
   // Seed random
   srand (time(NULL));
@@ -125,12 +64,12 @@ int main(int argc, char *argv[]){
 
   double initialFraction = 0.01;
   double infectionProb = 0.4;
-  double relativeReinfectionProb = 0;
+  double relativeReinfectionProb = 1;
   double mutationProb = 0;
 
 
   int maxMutations = 10;
-  int maxTime =1000;
+  int maxTime =30;
 
   int* isSick = new int[N*N];
   int* givenGerm = new int[N*N];
@@ -152,10 +91,10 @@ int main(int argc, char *argv[]){
     transmitPathogen(N, maxMutations, isSick, givenGerm, infectionJournal);
     numSick = infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, infectionJournal);
 
-    // plotPeople(N, isSick);
-    //  // To stop in between every time step.
-    //  std::cout << "Press enter to continue." << std::endl;
-    //  getchar();
+    plotPeople(N, isSick);
+     // To stop in between every time step.
+     std::cout << "Press enter to continue." << std::endl;
+     getchar();
   }
 
 
