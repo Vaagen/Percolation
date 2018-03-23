@@ -2,3 +2,8 @@
 .DS_Store
 *.trace*
 *.dSYM
+*.gz
+*.log
+*.out
+*.aux
+run
