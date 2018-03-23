@@ -1,6 +1,6 @@
 #include "epidemic.h"
 
-int initializeEpidemic(int N, double initialFraction, int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[]){
+int initializeEpidemic(int N, double initialFraction, int maxMutations,int isSick[],int givenGerm[],bool infectionJournal[], std::mt19937 gen, std::uniform_real_distribution<> real_dis){
   // std::random_device rd;
   // std::mt19937 gen(rd());
   // std::uniform_real_distribution<> dis(0.0, 1.0);
@@ -12,7 +12,7 @@ int initializeEpidemic(int N, double initialFraction, int maxMutations,int isSic
       infectionJournal[i*maxMutations + j]=0;
     }
 
-    if (((double) rand() / (RAND_MAX))<initialFraction){
+    if (real_dis(gen)<initialFraction){
       isSick[i] = 1; // is sick with mutation 1
       infectionJournal[i*maxMutations] = 1; // has been sick with mutation 1 -1 = 0
       numSick++;
@@ -53,30 +53,24 @@ void transmitPathogen(int N,int maxMutations,int isSick[],int givenGerm[],bool i
   }
 }
 
-int infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[]){
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> real_dis(0.0, 1.0);
-  std::uniform_int_distribution<> int_dis(1, maxMutations);
+int infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[], std::mt19937 gen, std::uniform_real_distribution<> real_dis, std::uniform_int_distribution<> int_dis){
   int numSick=0;
   for(int i=0; i<N*N; ++i){
     if(givenGerm[i]){ // If aquired pathogen
       // Mutate strain with probability mutationProb
-      if (((double) rand() / (RAND_MAX))<mutationProb){
-        givenGerm[i] = ceil(((double) rand() / (RAND_MAX))*maxMutations); //ceil to avoid mutating to zero (healthy)
+      if (real_dis(gen)<mutationProb){
+        givenGerm[i] = int_dis(gen);
       }
       // Infect with correct probability
       if(infectionJournal[i*maxMutations + givenGerm[i]-1]){// if had strain before
-        if (((double) rand() / (RAND_MAX))<reinfectionProb){ // gets sick
-        //if (real_dis(gen)<reinfectionProb){ // gets sick
+        if (real_dis(gen)<reinfectionProb){ // gets sick
           isSick[i] = givenGerm[i];
           numSick++;
         }else{ // does not get sick
           isSick[i] = 0;
         }
       }else{ // not had strain before
-        if (((double) rand() / (RAND_MAX))<infectionProb){ // gets sick
-        //if (real_dis(gen)<infectionProb){ // gets sick
+        if (real_dis(gen)<infectionProb){ // gets sick
           isSick[i] = givenGerm[i];
           infectionJournal[i*maxMutations + givenGerm[i]-1] = 1; // aquires immunity
           numSick++;
@@ -160,6 +154,26 @@ void plotHist(){
   matplotlibcpp::plot(X,Y1,"r*");
   matplotlibcpp::plot(X,Y2,"b*");
   matplotlibcpp::draw();
+  matplotlibcpp::pause(0.001);
+  std::cout << "Press enter to continue." << std::endl;
+  getchar();
+
+  // Now to see sequence/time dependancy
+  int length=100;
+  std::vector<double> X_t(length), Y1_t(length), Y2_t(length);
+  double randNUM=0;
+  double twistNUM=0;
+  for(int t=0;t<length;++t){
+    randNUM = ((double) rand() / (RAND_MAX));
+    twistNUM = real_dis(gen);
+    X_t.at(t)=t;
+    Y1_t.at(t)=randNUM;
+    Y2_t.at(t)=twistNUM;
+  }
+  matplotlibcpp::clf();
+  matplotlibcpp::plot(X_t,Y1_t,"r*");
+  matplotlibcpp::plot(X_t,Y2_t,"b*");
+  matplotlibcpp::show();
   matplotlibcpp::pause(0.001);
   std::cout << "Press enter to continue." << std::endl;
   getchar();

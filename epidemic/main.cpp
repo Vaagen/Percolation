@@ -28,11 +28,12 @@ double printTime(double start_time, double last_time){
 }
 
 int main(int argc, char *argv[]){
-  // Seed random
-  srand (time(NULL));
+  // // Seed random
+  // srand (time(NULL));
   // // Visual comparison of generators
   // plotHist();
   // return(0);
+
   // Starting timer.
   double start_time=clock();
   double last_time=start_time;
@@ -77,8 +78,15 @@ int main(int argc, char *argv[]){
   bool* infectionJournal = new bool[N*N*maxMutations];
   // The journal is indexed with true/false at location i if person has had mutation i+1
   int numSick=0;
-  // Initialize, set values to zero and infect 1% with mutation 1
-  numSick = initializeEpidemic(N, initialFraction, maxMutations, isSick, givenGerm, infectionJournal);
+
+  // Initialize random generators
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> real_dis(0.0, 1.0);
+  std::uniform_int_distribution<> int_dis(1, maxMutations);
+
+  // Initialize simulation
+  numSick = initializeEpidemic(N, initialFraction, maxMutations, isSick, givenGerm, infectionJournal, gen, real_dis);
   std::cout << "Finished initialization of epidemic."<< std::endl;
   last_time = printTime(start_time,last_time);
 
@@ -89,8 +97,9 @@ int main(int argc, char *argv[]){
     //std::cout << numSick/NN << std::endl;
     ++t;
     transmitPathogen(N, maxMutations, isSick, givenGerm, infectionJournal);
-    numSick = infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, infectionJournal);
+    numSick = infectPeople(N, infectionProb, reinfectionProb, mutationProb, maxMutations, isSick, givenGerm, infectionJournal, gen, real_dis, int_dis);
 
+    // Plot simulation
     plotPeople(N, isSick);
      // To stop in between every time step.
      std::cout << "Press enter to continue." << std::endl;
