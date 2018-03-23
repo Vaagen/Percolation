@@ -44,6 +44,9 @@
 \begin{document}
 \maketitle
 
+\todo[inline]{Comment difference between trees/people: We need to average over different forest configurations as well as over time. For sick people, since they do not die, we average over different configurations of sick people while doing the time propagation.}
+\todo[inline]{A comment: In Monte Carlo routine we need more than $N^2$ to scale fast enough. We are taking the average over different configurations that are a subset of possible configurations, which is scaling as $2^N$, so we are really cutting down quite a lot!}
+\todo[inline]{rand() actually gives not random results for my setup!}
 
 
 %\bibliographystyle{IEEEtran}
