@@ -53,7 +53,7 @@ void transmitPathogen(int N,int maxMutations,int isSick[],int givenGerm[],bool i
   }
 }
 
-int infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[], std::mt19937 gen, std::uniform_real_distribution<> real_dis, std::uniform_int_distribution<> int_dis){
+int infectPeople(int N, double infectionProb, double reinfectionProb, double mutationProb, int maxMutations, int isSick[], int givenGerm[],bool infectionJournal[], std::mt19937& gen, std::uniform_real_distribution<> real_dis, std::uniform_int_distribution<> int_dis){
   int numSick=0;
   for(int i=0; i<N*N; ++i){
     if(givenGerm[i]){ // If aquired pathogen
