@@ -3,10 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage[mediumspace, squaren]{SIunits}
 \usepackage{hyperref}
-%\usepackage{parskip} %skip the indent of a new paragraph.
-\usepackage{booktabs} % Better tables. Provides \toprule, \midrule, \bottomrule.
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{listings}
@@ -14,26 +11,12 @@
 \usepackage{cleveref}
 \usepackage[]{todonotes}
 \usepackage{mathtools}
-%\usepackage[makeroom]{cancel}
+\usepackage{multicol,caption}		% For multiple columns, and add captions 
 
-%%% begin DEFINITIONS
-    \newcommand{\bbm}{\begin{bmatrix}}
-    \newcommand{\ebm}{\end{bmatrix}}
-    \newcommand{\tn}{\textnormal}
-    \newcommand{\mn}{\mathnormal}
-    \newcommand{\mb}{\mathbf}
-    \newcommand{\mbs}{\boldsymbol}
-    \newcommand*{\cFont}{\fontfamily{pcr}\selectfont}
+\newenvironment{Figure}			% For figures in multicol
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
     
-    \newcommand{\mps}{\metre\per\second}
-    
-    \renewcommand{\lstlistingname}{Script}
-    \renewcommand{\lstlistlistingname}{List of \lstlistingname s}
-    \crefname{listing}{script}{scripts}  
-    \Crefname{listing}{Script}{Scripts}
-    
-    \def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
-    \let\endchangemargin=\endlist
     
 \title{Percolation \\
 	\large Assignment 2 in Computational Physics}
@@ -43,13 +26,24 @@
 
 \begin{document}
 \maketitle
+\begin{multicols*}{2}
 
 \todo[inline]{Comment difference between trees/people: We need to average over different forest configurations as well as over time. For sick people, since they do not die, we average over different configurations of sick people while doing the time propagation.}
 \todo[inline]{A comment: In Monte Carlo routine we need more than $N^2$ to scale fast enough. We are taking the average over different configurations that are a subset of possible configurations, which is scaling as $2^N$, so we are really cutting down quite a lot!}
 \todo[inline]{rand() actually gives not random results for my setup!}
 
+\todo[inline]{Comment on how montecarlo integration of forests needs to integrate also over different forests, while for the epidemic we just integrate over a longer time.}
 
-%\bibliographystyle{IEEEtran}
-%\bibliography{bibliography}
 
+
+%\begin{Figure}
+%	\centering
+%	\includegraphics[width=\linewidth]{figures/figure.png}
+%	\captionof{figure}{Figure.}
+%	\label{fig:figure}
+%\end{Figure}
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibl}
+\end{multicols*}
 \end{document}
