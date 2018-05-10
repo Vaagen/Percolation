@@ -4,4 +4,4 @@
 
 # To include headers for python, for matplotlibcpp
 run: main.cpp epidemic.cpp epidemic.h
-	g++ -g -o run -std=c++11 -I/usr/include/python2.7 -lpython2.7  main.cpp epidemic.cpp
+	g++ -O3 -march=native -o run -std=c++11 -I/usr/include/python2.7 -lpython2.7  main.cpp epidemic.cpp
